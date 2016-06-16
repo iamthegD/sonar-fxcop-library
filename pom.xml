@@ -49,6 +49,7 @@
   <properties>
     <sonarqube.version>4.5.2</sonarqube.version>
     <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+    <gitRepositoryName>sonar-fxcop-library</gitRepositoryName>
   </properties>
 
   <dependencies>
