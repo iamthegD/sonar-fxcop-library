@@ -52,6 +52,7 @@ public class FxCopRulesDefinitionTest {
     }
 
     assertThat(containsCustomRule(rules)).isTrue();
+    assertThat(containsTags(rules)).isTrue();
   }
 
   @Test
@@ -79,6 +80,16 @@ public class FxCopRulesDefinitionTest {
   private static boolean containsCustomRule(List<Rule> rules) {
     for (Rule rule : rules) {
       if (rule.template() && "CustomRuleTemplate".equals(rule.key())) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private boolean containsTags(List<Rule> rules) {
+    for (Rule rule : rules) {
+      if (!rule.tags().isEmpty()) {
         return true;
       }
     }
