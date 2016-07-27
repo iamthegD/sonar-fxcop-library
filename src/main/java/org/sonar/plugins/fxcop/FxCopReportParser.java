@@ -22,10 +22,10 @@ package org.sonar.plugins.fxcop;
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.io.Closeables;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -51,11 +51,10 @@ public class FxCopReportParser {
     public List<FxCopIssue> parse(File file) {
       this.file = file;
 
-      InputStreamReader reader = null;
       XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
 
-      try {
-        reader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8);
+      try (InputStream is = new FileInputStream(file);
+        InputStreamReader reader = new InputStreamReader(is, Charsets.UTF_8)) {
         stream = xmlFactory.createXMLStreamReader(reader);
 
         while (stream.hasNext()) {
@@ -69,13 +68,10 @@ public class FxCopReportParser {
             }
           }
         }
-      } catch (IOException e) {
-        throw Throwables.propagate(e);
-      } catch (XMLStreamException e) {
+      } catch (IOException | XMLStreamException e) {
         throw Throwables.propagate(e);
       } finally {
         closeXmlStream();
-        Closeables.closeQuietly(reader);
       }
 
       return filesBuilder.build();
