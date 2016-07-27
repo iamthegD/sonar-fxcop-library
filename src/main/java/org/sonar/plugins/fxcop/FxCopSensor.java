@@ -68,12 +68,10 @@ public class FxCopSensor implements Sensor {
   public boolean shouldExecuteOnProject(Project project) {
     boolean shouldExecute;
 
-    if (!hasFilesToAnalyze()) {
+    if (!hasFilesToAnalyze() || !SystemUtils.IS_OS_WINDOWS) {
       shouldExecute = false;
     } else if (profile.getActiveRulesByRepository(fxCopConf.repositoryKey()).isEmpty()) {
       LOG.info("All FxCop rules are disabled, skipping its execution.");
-      shouldExecute = false;
-    } else if (!SystemUtils.IS_OS_WINDOWS) {
       shouldExecute = false;
     } else {
       shouldExecute = true;
@@ -88,11 +86,11 @@ public class FxCopSensor implements Sensor {
 
   @Override
   public void analyse(Project project, SensorContext context) {
-    analyse(context, new FxCopRulesetWriter(), new FxCopReportParser(), new FxCopExecutor(), perspectives.as(Issuable.class, (Resource)project));
+    analyse(new FxCopRulesetWriter(), new FxCopReportParser(), new FxCopExecutor(), perspectives.as(Issuable.class, (Resource) project));
   }
 
   @VisibleForTesting
-  void analyse(SensorContext context, FxCopRulesetWriter writer, FxCopReportParser parser, FxCopExecutor executor, Issuable projectIssuable) {
+  void analyse(FxCopRulesetWriter writer, FxCopReportParser parser, FxCopExecutor executor, Issuable projectIssuable) {
     fxCopConf.checkProperties(settings);
 
     File reportFile;
@@ -127,18 +125,7 @@ public class FxCopSensor implements Sensor {
       } else {
         issuable = projectIssuable;
         isOnProjectIssuable = true;
-
-        if (absolutePath != null) {
-          messageLocation += absolutePath;
-
-          if (issue.line() != null) {
-            messageLocation += " line " + issue.line();
-          }
-        }
-
-        if (!messageLocation.isEmpty()) {
-          messageLocation += ": ";
-        }
+        messageLocation = createMessageLocation(absolutePath, issue.line());
       }
 
       if (issuable == null) {
@@ -157,6 +144,20 @@ public class FxCopSensor implements Sensor {
 
       issuable.addIssue(issueBuilder.build());
     }
+  }
+
+  private static String createMessageLocation(String absolutePath, Integer line) {
+    String messageLocation = "";
+    if (absolutePath != null) {
+      messageLocation += absolutePath;
+
+      if (line != null) {
+        messageLocation += " line " + line;
+      }
+
+      messageLocation += ": ";
+    }
+    return messageLocation;
   }
 
   @CheckForNull

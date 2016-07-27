@@ -44,9 +44,7 @@ import org.sonar.api.rule.RuleKey;
 import org.sonar.api.rules.ActiveRule;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class FxCopSensorTest {
 
@@ -109,7 +107,6 @@ public class FxCopSensorTest {
     List<ActiveRule> activeRules = mockActiveRules("CA0000", "CA1000", "CustomRuleTemplate", "CR1000");
     when(profile.getActiveRulesByRepository("foo-fxcop")).thenReturn(activeRules);
 
-    SensorContext context = mock(SensorContext.class);
     FxCopExecutor executor = mock(FxCopExecutor.class);
 
     File workingDir = new File(new File("target/FxCopSensorTest/working-dir").getAbsolutePath());
@@ -194,7 +191,7 @@ public class FxCopSensorTest {
         new FxCopIssue(800, "CA0000", "basePath", "Class8.cs", 8, "Fifth message"), // language "bar" -> on file+line
         new FxCopIssue(800, "CR1000", "basePath", "Class9.cs", 9, "Sixth message"))); // all good -> on file+line
 
-    sensor.analyse(context, writer, parser, executor, projectIssuable);
+    sensor.analyse(writer, parser, executor, projectIssuable);
 
     verify(writer).write(ImmutableList.of("CA0000", "CA1000", "CR1000"), new File(workingDir, "fxcop-sonarqube.ruleset"));
     verify(executor).execute("FxCopCmd.exe", "MyLibrary.dll", new File(workingDir, "fxcop-sonarqube.ruleset"), new File(workingDir, "fxcop-report.xml"), 42, true,
@@ -261,16 +258,15 @@ public class FxCopSensorTest {
     File reportFile = new File("src/test/resources/FxCopSensorTest/fxcop-report.xml");
     settings.setProperty("reportPath", reportFile.getAbsolutePath());
 
-    SensorContext context = mock(SensorContext.class);
     FxCopRulesetWriter writer = mock(FxCopRulesetWriter.class);
     FxCopReportParser parser = mock(FxCopReportParser.class);
     FxCopExecutor executor = mock(FxCopExecutor.class);
 
-    sensor.analyse(context, writer, parser, executor, mock(Issuable.class));
+    sensor.analyse(writer, parser, executor, mock(Issuable.class));
 
-    verify(writer, Mockito.never()).write(Mockito.anyList(), Mockito.any(File.class));
-    verify(executor, Mockito.never()).execute(
-      Mockito.anyString(), Mockito.anyString(), Mockito.any(File.class), Mockito.any(File.class), Mockito.anyInt(), Mockito.anyBoolean(), Mockito.anyList(), Mockito.anyList());
+    verify(writer, never()).write(anyListOf(String.class), any(File.class));
+    verify(executor, never()).execute(
+      anyString(), anyString(), any(File.class), any(File.class), anyInt(), anyBoolean(), anyListOf(String.class), anyListOf(String.class));
 
     verify(parser).parse(new File(reportFile.getAbsolutePath()));
   }

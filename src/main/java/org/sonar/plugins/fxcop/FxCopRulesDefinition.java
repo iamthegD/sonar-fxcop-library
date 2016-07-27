@@ -51,6 +51,7 @@ public class FxCopRulesDefinition implements RulesDefinition {
     repository.done();
   }
 
+  @FunctionalInterface
   public static interface FxCopRulesDefinitionSqaleLoader {
     void loadSqale(NewRepository repository);
   }

@@ -59,13 +59,7 @@ public class FxCopReportParser {
 
         while (stream.hasNext()) {
           if (stream.next() == XMLStreamConstants.START_ELEMENT) {
-            String tagName = stream.getLocalName();
-
-            if ("Message".equals(tagName)) {
-              handleMessageTag();
-            } else if (!isSuppressed && "Issue".equals(tagName)) {
-              handleIssueTag();
-            }
+            parseStartElement();
           }
         }
       } catch (IOException | XMLStreamException e) {
@@ -75,6 +69,16 @@ public class FxCopReportParser {
       }
 
       return filesBuilder.build();
+    }
+
+    private void parseStartElement() throws XMLStreamException {
+      String tagName = stream.getLocalName();
+
+      if ("Message".equals(tagName)) {
+        handleMessageTag();
+      } else if (!isSuppressed && "Issue".equals(tagName)) {
+        handleIssueTag();
+      }
     }
 
     private void closeXmlStream() {
