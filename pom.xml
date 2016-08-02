@@ -10,7 +10,7 @@
 
   <groupId>org.sonarsource.fxcop</groupId>
   <artifactId>sonar-fxcop-library</artifactId>
-  <version>1.5-SNAPSHOT</version>
+  <version>1.6-SNAPSHOT</version>
 
   <name>SonarQube FxCop Library</name>
   <description />
